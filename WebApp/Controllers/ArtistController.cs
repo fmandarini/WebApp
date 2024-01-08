@@ -16,25 +16,28 @@ public class ArtistController : ControllerBase
         _logger = logger;
         _artistServices = artistServices;
     }
-    
+
     [HttpGet]
     public async Task<OkObjectResult> GetArtists()
     {
-        var artists = await _artistServices.GetArtistsAsync();
+        var ct = HttpContext.RequestAborted;
+        var artists = await _artistServices.GetArtistsAsync(ct);
         return Ok(artists);
     }
 
     [HttpPost]
     public async Task<IResult> PostArtist(ArtistDtoEssential newArtist)
     {
-        var newArtistWithId = await _artistServices.AddArtistAsync(newArtist);
+        var ct = HttpContext.RequestAborted;
+        var newArtistWithId = await _artistServices.AddArtistAsync(newArtist, ct);
         return Results.Created($"artists/{newArtistWithId.Id}", newArtistWithId);
     }
 
     [HttpPost("{id:int}/concerts")]
     public async Task<IResult> PostConcertsToArtist(int id, ConcertDtoEssential newConcerts)
     {
-        if (await _artistServices.AddConcertToArtist(id, newConcerts))
+        var ct = HttpContext.RequestAborted;
+        if (await _artistServices.AddConcertToArtist(id, newConcerts, ct))
         {
             return Results.Ok();
         }
@@ -45,10 +48,7 @@ public class ArtistController : ControllerBase
     [HttpPost("concerts")]
     public async Task PostArtistWithConcerts(ArtistConcertsDetailDto newArtist)
     {
-        await _artistServices.AddArtistWithConcertsAsync(newArtist);
+        var ct = HttpContext.RequestAborted;
+        await _artistServices.AddArtistWithConcertsAsync(newArtist, ct);
     }
-    
-    
-    
-    
 }

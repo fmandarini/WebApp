@@ -9,28 +9,30 @@ namespace Services;
 
 public class DbConcertsImpl(MusicDbContext context) : IConcert
 {
-    public async Task<List<ConcertArtistDetailDto>?> GetConcertsAsync()
+    public async Task<List<ConcertArtistDetailDto>?> GetConcertsAsync(CancellationToken ct)
     {
         return (await context.Concerts
                 .AsNoTracking()
                 .Include(concert => concert.Artist)
-                .ToListAsync())
+                .ToListAsync(cancellationToken: ct))
             .ConvertConcertsToDto();
     }
 
-    public async Task<ConcertsGetResponse> GetConcertsAsync(int page, int elements, OrderingDirection direction, string? orderBy)
+    public async Task<ConcertsGetResponse> GetConcertsAsync(
+        int page, int elements, OrderingDirection direction,
+        string? orderBy, CancellationToken ct)
     {
         var response = new ConcertsGetResponse
         {
             Total = await context.Concerts
                 .AsNoTracking()
-                .CountAsync(),
+                .CountAsync(cancellationToken: ct),
             Page = page
         };
-        
+
         var selectedConcerts = context.Concerts
-                .AsNoTracking()
-                .Include(concert => concert.Artist);
+            .AsNoTracking()
+            .Include(concert => concert.Artist);
         var orderedConcerts = orderBy?.ToLower() switch
         {
             "location" => direction == OrderingDirection.Ascending
@@ -44,31 +46,31 @@ public class DbConcertsImpl(MusicDbContext context) : IConcert
         var concertsList = (await orderedConcerts
             .Skip(elements * (page - 1))
             .Take(elements)
-            .ToListAsync()).ConvertConcertsToDto();
+            .ToListAsync(cancellationToken: ct)).ConvertConcertsToDto();
         response.Concerts = concertsList;
 
         return response;
     }
 
-    public async Task<ConcertDto?> GetConcertDtoAsync(int id)
+    public async Task<ConcertDto?> GetConcertDtoAsync(int id, CancellationToken ct)
     {
         return (await context.Concerts
                 .AsNoTracking()
                 .Include(concert => concert.Artist)
-                .FirstOrDefaultAsync(c => c.Id == id))?
+                .FirstOrDefaultAsync(c => c.Id == id, cancellationToken: ct))?
             .ConvertConcertSpecialToDto();
     }
 
-    public async Task<ConcertArtistDetailDto?> GetConcertAsync(int id)
+    public async Task<ConcertArtistDetailDto?> GetConcertAsync(int id, CancellationToken ct)
     {
         return (await context.Concerts
                 .AsNoTracking()
                 .Include(concert => concert.Artist)
-                .FirstOrDefaultAsync(c => c.Id == id))?
+                .FirstOrDefaultAsync(c => c.Id == id, cancellationToken: ct))?
             .ConvertConcertToDto();
     }
 
-    public async Task<int> AddConcertAsync(ConcertDtoBase concert)
+    public async Task<int> AddConcertAsync(ConcertDtoBase concert, CancellationToken ct)
     {
         var concertDb = concert.ConvertDtoToConcert();
 
@@ -80,34 +82,35 @@ public class DbConcertsImpl(MusicDbContext context) : IConcert
                 Surname = concert.Artist.Surname,
                 BirthYear = concert.Artist.BirthYear
             };
-            await context.Artists.AddAsync(newArtist);
-            await context.SaveChangesAsync();
+            await context.Artists.AddAsync(newArtist, ct);
+            await context.SaveChangesAsync(ct);
             concertDb.ArtistId = newArtist.Id;
         }
-        
-        await context.Concerts.AddAsync(concertDb);
-        await context.SaveChangesAsync();
+
+        await context.Concerts.AddAsync(concertDb, ct);
+        await context.SaveChangesAsync(ct);
         return concertDb.Id;
     }
 
-    public async Task DeleteConcertAsync(int id)
+    public async Task DeleteConcertAsync(int id, CancellationToken ct)
     {
         var concert = await context.Concerts
             .AsNoTracking()
             .Include(concert => concert.Artist)
-            .FirstOrDefaultAsync(c => c.Id == id);
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken: ct);
         if (concert is not null)
         {
             context.Artists.RemoveRange(concert.Artist);
             context.Concerts.Remove(concert);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(ct);
     }
 
-    public async Task UpdateConcertAsync(ConcertDto updatedConcert)
+    public async Task UpdateConcertAsync(ConcertDto updatedConcert, CancellationToken ct)
     {
-        var concertDb = await context.Concerts.FirstOrDefaultAsync(x => x.Id == updatedConcert.Id);
+        var concertDb =
+            await context.Concerts.FirstOrDefaultAsync(x => x.Id == updatedConcert.Id, cancellationToken: ct);
 
         if (concertDb is not null)
         {
@@ -115,6 +118,6 @@ public class DbConcertsImpl(MusicDbContext context) : IConcert
             concertDb.Location = updatedConcert.Location;
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(ct);
     }
 }

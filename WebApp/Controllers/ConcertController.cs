@@ -22,7 +22,8 @@ public class ConcertController : ControllerBase
     [HttpGet]
     public async Task<OkObjectResult> GetConcerts()
     {
-        return Ok(await _concertServices.GetConcertsAsync());
+        var ct = HttpContext.RequestAborted;
+        return Ok(await _concertServices.GetConcertsAsync(ct));
     }
 
     [HttpGet("page")]
@@ -31,21 +32,24 @@ public class ConcertController : ControllerBase
         string? orderBy = "Date",
         OrderingDirection orderingDirection = OrderingDirection.Ascending)
     {
-        return Ok(await _concertServices.GetConcertsAsync(page, NumberElementsPerPage, orderingDirection, orderBy));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await _concertServices.GetConcertsAsync(page, NumberElementsPerPage, orderingDirection, orderBy, ct));
     }
 
     [HttpGet("{id:int}")]
     public async Task<IResult> GetConcert(int id)
     {
-        var concert = await _concertServices.GetConcertAsync(id);
+        var ct = HttpContext.RequestAborted;
+        var concert = await _concertServices.GetConcertAsync(id, ct);
         return concert is null ? Results.NotFound() : Results.Ok(concert);
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IResult> DeleteConcert(int id)
     {
-        if (await _concertServices.GetConcertAsync(id) is null) return Results.NotFound();
-        await _concertServices.DeleteConcertAsync(id);
+        var ct = HttpContext.RequestAborted;
+        if (await _concertServices.GetConcertAsync(id, ct) is null) return Results.NotFound();
+        await _concertServices.DeleteConcertAsync(id, ct);
         return Results.Ok();
     }
 
@@ -54,13 +58,14 @@ public class ConcertController : ControllerBase
     {
         if (id != updatedConcert.Id) return Results.BadRequest();
 
-        var concert = await _concertServices.GetConcertDtoAsync(id);
+        var ct = HttpContext.RequestAborted;
+        var concert = await _concertServices.GetConcertDtoAsync(id, ct);
         if (concert is null) return Results.NotFound();
         if (updatedConcert.ArtistId != 0) concert.ArtistId = updatedConcert.ArtistId;
         if (updatedConcert.Date.Year != 1) concert.Date = updatedConcert.Date;
         concert.Location = updatedConcert.Location;
 
-        await _concertServices.UpdateConcertAsync(concert);
+        await _concertServices.UpdateConcertAsync(concert, ct);
         return Results.NoContent();
     }
 
@@ -69,13 +74,14 @@ public class ConcertController : ControllerBase
     {
         if (id != updatedConcert.Id) return Results.BadRequest();
 
-        var concert = await _concertServices.GetConcertDtoAsync(id);
+        var ct = HttpContext.RequestAborted;
+        var concert = await _concertServices.GetConcertDtoAsync(id, ct);
         if (concert is null) return Results.NotFound();
         if (updatedConcert.ArtistId != 0) concert.ArtistId = updatedConcert.ArtistId;
         if (updatedConcert.Date.Year != 1) concert.Date = updatedConcert.Date;
         concert.Location = updatedConcert.Location;
 
-        await _concertServices.UpdateConcertAsync(concert);
+        await _concertServices.UpdateConcertAsync(concert, ct);
         return Results.NoContent();
     }
 }
