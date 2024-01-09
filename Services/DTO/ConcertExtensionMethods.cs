@@ -5,14 +5,14 @@ namespace Services.DTO;
 
 public static class ConcertExtensionMethods
 {
-    public static List<ConcertArtistDetailDto> ConvertConcertsToDto(this List<Concert> concerts)
+    public static List<ConcertArtistDetailDto> ConvertConcertsToDto(this IEnumerable<Concert> concerts)
     {
-        return concerts.Select(concert => new ConcertArtistDetailDto()
+        return concerts.Select(concert => new ConcertArtistDetailDto
         {
             Id = concert.Id,
             Date = concert.Date,
             Location = concert.Location,
-            Artist = new ArtistDtoEssential()
+            Artist = new ArtistDtoEssential
             {
                 Name = concert.Artist.Name,
                 Surname = concert.Artist.Surname,
@@ -23,12 +23,12 @@ public static class ConcertExtensionMethods
 
     public static ConcertArtistDetailDto ConvertConcertToDto(this Concert concert)
     {
-        return new ConcertArtistDetailDto()
+        return new ConcertArtistDetailDto
         {
             Id = concert.Id,
             Date = concert.Date,
             Location = concert.Location,
-            Artist = new ArtistDtoEssential()
+            Artist = new ArtistDtoEssential
             {
                 Name = concert.Artist.Name,
                 Surname = concert.Artist.Surname,
@@ -39,7 +39,7 @@ public static class ConcertExtensionMethods
 
     public static ConcertDto ConvertConcertSpecialToDto(this Concert concert)
     {
-        return new ConcertDto()
+        return new ConcertDto
         {
             Id = concert.Id,
             Date = concert.Date,

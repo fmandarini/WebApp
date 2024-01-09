@@ -47,7 +47,7 @@ public class DbArtistsImpl(MusicDbContext context) : IArtist
 
     public async Task AddArtistWithConcertsAsync(ArtistConcertsDetailDto newArtist, CancellationToken ct)
     {
-        var artistDb = new Artist()
+        var artistDb = new Artist
         {
             Name = newArtist.Name,
             Surname = newArtist.Surname,
