@@ -6,18 +6,24 @@ using Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Look Dependency Injection
 builder.Services.AddScoped<IConcert, DbConcertsImpl>();
 builder.Services.AddScoped<IArtist, DbArtistsImpl>();
 
+
+// Look migrationsAssembly
 builder.Services.AddDbContext<MusicDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("MusicDB"),
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("MusicDB"),
         optionsBuilder => optionsBuilder.MigrationsAssembly("Database")));
 
+// Look configuration of dependency injection
+// https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-8.0
 // var numberElementsPerPage = builder.Configuration["NumberElementsPerPage"] != null
 //     ? Convert.ToInt32(builder.Configuration["NumberElementsPerPage"])
 //     : 2;
@@ -41,10 +47,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Add default data to database
 using (var scope = app.Services.CreateScope())
 {
-    using var dbContext = scope.ServiceProvider.GetRequiredService<MusicDbContext>();
-    dbContext.Database.EnsureCreated();
+    await using var dbContext = scope.ServiceProvider.GetRequiredService<MusicDbContext>();
+    await dbContext.Database.EnsureCreatedAsync();
 }
 
 app.Run();

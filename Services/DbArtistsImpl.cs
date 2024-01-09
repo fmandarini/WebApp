@@ -11,17 +11,16 @@ public class DbArtistsImpl(MusicDbContext context) : IArtist
 {
     public async Task<List<ArtistConcertsDetailWithIdDto>?> GetArtistsAsync(CancellationToken ct)
     {
-        return (await context.Artists
-                .AsNoTracking()
-                .Include(artist => artist.Concerts)
-                .ToListAsync(cancellationToken: ct))
-            .ConvertArtistsToDto();
+        var artistDb = await context.Artists
+            .AsNoTracking()
+            .Include(artist => artist.Concerts)
+            .ToListAsync(cancellationToken: ct);
+        return artistDb.ConvertArtistsToDto();
     }
 
     public async Task<ArtistDtoWithId> AddArtistAsync(ArtistDtoEssential newArtist, CancellationToken ct)
     {
         var artistDb = newArtist.ConvertDtoToArtist();
-
         await context.Artists.AddAsync(artistDb, ct);
         await context.SaveChangesAsync(ct);
 
@@ -30,10 +29,11 @@ public class DbArtistsImpl(MusicDbContext context) : IArtist
 
     public async Task<bool> AddConcertToArtist(int id, ConcertDtoEssential newConcert, CancellationToken ct)
     {
-        var artistDb = await context.Artists.FirstOrDefaultAsync(artist => artist.Id == id, cancellationToken: ct);
-        if (artistDb == null)
+        var artistDb = await context.Artists
+            .FirstOrDefaultAsync(artist => artist.Id == id, cancellationToken: ct);
+        if (artistDb is null)
             return false;
-        var newConcertDb = new Concert()
+        var newConcertDb = new Concert
         {
             Date = newConcert.Date,
             Location = newConcert.Location,
@@ -41,6 +41,7 @@ public class DbArtistsImpl(MusicDbContext context) : IArtist
         };
         await context.Concerts.AddAsync(newConcertDb, ct);
         await context.SaveChangesAsync(ct);
+
         return true;
     }
 

@@ -6,28 +6,28 @@ using Models.Interfaces;
 namespace WebApp.Controllers;
 
 [ApiController]
-[Route("concerts")]
-public class ConcertController : ControllerBase
+[Route("[controller]")]
+public class ConcertsController : ControllerBase
 {
     private readonly IConcert _concertServices;
     private const int NumberElementsPerPage = 2;
-    private readonly ILogger<ConcertController> _logger;
+    private readonly ILogger<ConcertsController> _logger;
 
-    public ConcertController(ILogger<ConcertController> logger, IConcert concertServices)
+    public ConcertsController(ILogger<ConcertsController> logger, IConcert concertServices)
     {
         _logger = logger;
         _concertServices = concertServices;
     }
 
     [HttpGet]
-    public async Task<OkObjectResult> GetConcerts()
+    public async Task<IActionResult> GetConcerts()
     {
         var ct = HttpContext.RequestAborted;
         return Ok(await _concertServices.GetConcertsAsync(ct));
     }
 
     [HttpGet("page")]
-    public async Task<OkObjectResult> GetConcertsWithPagination(
+    public async Task<IActionResult> GetConcertsWithPagination(
         int page = 1,
         string? orderBy = "Date",
         OrderingDirection orderingDirection = OrderingDirection.Ascending)
@@ -37,51 +37,51 @@ public class ConcertController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IResult> GetConcert(int id)
+    public async Task<IActionResult> GetConcert(int id)
     {
         var ct = HttpContext.RequestAborted;
         var concert = await _concertServices.GetConcertAsync(id, ct);
-        return concert is null ? Results.NotFound() : Results.Ok(concert);
+        return concert is null ? NotFound() : Ok(concert);
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IResult> DeleteConcert(int id)
+    public async Task<IActionResult> DeleteConcert(int id)
     {
         var ct = HttpContext.RequestAborted;
-        if (await _concertServices.GetConcertAsync(id, ct) is null) return Results.NotFound();
+        if (await _concertServices.GetConcertAsync(id, ct) is null) return NotFound();
         await _concertServices.DeleteConcertAsync(id, ct);
-        return Results.Ok();
+        return Ok();
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IResult> PutConcert(int id, ConcertDto updatedConcert)
+    public async Task<IActionResult> PutConcert(int id, ConcertDto updatedConcert)
     {
-        if (id != updatedConcert.Id) return Results.BadRequest();
+        if (id != updatedConcert.Id) return BadRequest();
 
         var ct = HttpContext.RequestAborted;
         var concert = await _concertServices.GetConcertDtoAsync(id, ct);
-        if (concert is null) return Results.NotFound();
+        if (concert is null) return NotFound();
         if (updatedConcert.ArtistId != 0) concert.ArtistId = updatedConcert.ArtistId;
         if (updatedConcert.Date.Year != 1) concert.Date = updatedConcert.Date;
         concert.Location = updatedConcert.Location;
 
         await _concertServices.UpdateConcertAsync(concert, ct);
-        return Results.NoContent();
+        return NoContent();
     }
 
     [HttpPatch("{id:int}")]
-    public async Task<IResult> PatchConcert(int id, Concert updatedConcert)
+    public async Task<IActionResult> PatchConcert(int id, Concert updatedConcert)
     {
-        if (id != updatedConcert.Id) return Results.BadRequest();
+        if (id != updatedConcert.Id) return BadRequest();
 
         var ct = HttpContext.RequestAborted;
         var concert = await _concertServices.GetConcertDtoAsync(id, ct);
-        if (concert is null) return Results.NotFound();
+        if (concert is null) return NotFound();
         if (updatedConcert.ArtistId != 0) concert.ArtistId = updatedConcert.ArtistId;
         if (updatedConcert.Date.Year != 1) concert.Date = updatedConcert.Date;
         concert.Location = updatedConcert.Location;
 
         await _concertServices.UpdateConcertAsync(concert, ct);
-        return Results.NoContent();
+        return NoContent();
     }
 }

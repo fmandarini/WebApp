@@ -6,5 +6,5 @@ public class Artist
     public required string Name { get; set; }
     public required string Surname { get; set; }
     public int BirthYear { get; set; }
-    public List<Concert> Concerts { get; set; } = new();
+    public List<Concert> Concerts { get; set; } = [];
 }

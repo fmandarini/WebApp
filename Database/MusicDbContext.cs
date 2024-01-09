@@ -1,4 +1,4 @@
-﻿using Database.Configuration;
+﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Models;
 
@@ -10,9 +10,9 @@ public class MusicDbContext : DbContext
     public DbSet<Artist> Artists { get; init; } = null!;
     public MusicDbContext(DbContextOptions<MusicDbContext> dbContextOptions) : base(dbContextOptions) { }
     public MusicDbContext() { }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ArtistConfiguration).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }
