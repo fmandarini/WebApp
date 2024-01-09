@@ -41,4 +41,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+using (var scope = app.Services.CreateScope())
+{
+    using var dbContext = scope.ServiceProvider.GetRequiredService<MusicDbContext>();
+    dbContext.Database.EnsureCreated();
+}
+
 app.Run();
