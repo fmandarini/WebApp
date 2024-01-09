@@ -10,13 +10,17 @@ namespace WebApp.Controllers;
 public class ConcertsController : ControllerBase
 {
     private readonly IConcert _concertServices;
-    private const int NumberElementsPerPage = 2;
+    private readonly int _numberElementsPerPage;
     private readonly ILogger<ConcertsController> _logger;
 
-    public ConcertsController(ILogger<ConcertsController> logger, IConcert concertServices)
+    public ConcertsController(ILogger<ConcertsController> logger, IConcert concertServices,
+        IConfiguration configuration)
     {
-        _logger = logger;
         _concertServices = concertServices;
+        _numberElementsPerPage = configuration.GetValue<int?>("NumberElementsPerPage") is not null
+            ? Convert.ToInt32(configuration.GetValue<int>("NumberElementsPerPage"))
+            : 2;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -33,7 +37,8 @@ public class ConcertsController : ControllerBase
         OrderingDirection orderingDirection = OrderingDirection.Ascending)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await _concertServices.GetConcertsAsync(page, NumberElementsPerPage, orderingDirection, orderBy, ct));
+        return Ok(await _concertServices.GetConcertsAsync(page, _numberElementsPerPage, orderingDirection, orderBy,
+            ct));
     }
 
     [HttpGet("{id:int}")]

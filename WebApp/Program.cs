@@ -15,7 +15,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IConcert, DbConcertsImpl>();
 builder.Services.AddScoped<IArtist, DbArtistsImpl>();
 
-
 // Look migrationsAssembly
 builder.Services.AddDbContext<MusicDbContext>(options =>
     options.UseSqlite(
@@ -24,10 +23,6 @@ builder.Services.AddDbContext<MusicDbContext>(options =>
 
 // Look configuration of dependency injection
 // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-8.0
-// var numberElementsPerPage = builder.Configuration["NumberElementsPerPage"] != null
-//     ? Convert.ToInt32(builder.Configuration["NumberElementsPerPage"])
-//     : 2;
-
 var app = builder.Build();
 
 app.UseExceptionHandler(exceptionHandlerApp =>
