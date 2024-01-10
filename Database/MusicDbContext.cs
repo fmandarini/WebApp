@@ -1,4 +1,4 @@
-﻿using Database.Configuration;
+﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Models;
 
@@ -11,15 +11,8 @@ public class MusicDbContext : DbContext
     public MusicDbContext(DbContextOptions<MusicDbContext> dbContextOptions) : base(dbContextOptions) { }
     public MusicDbContext() { }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder
-            .UseSqlite(
-                "Data Source=/Users/Francesco/Documents/Ellycode/WebApp/Database/MusicDB");
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ArtistConfiguration).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }

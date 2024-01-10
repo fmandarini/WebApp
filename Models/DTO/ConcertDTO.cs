@@ -19,12 +19,12 @@ public class ConcertDtoEssential
     public required string Location { get; init; } = null!;
 }
 
-public class ConcertDtoEssentialWithArtist
-{
-    public DateTime Date { get; set; }
-    public string Location { get; set; } = null!;
-    public ArtistDtoEssential Artist { get; set; } = null!;
-}
+// public class ConcertDtoEssentialWithArtist
+// {
+//     public DateTime Date { get; set; }
+//     public string Location { get; set; } = null!;
+//     public ArtistDtoEssential Artist { get; set; } = null!;
+// }
 
 public class ConcertArtistDetailDto
 {
