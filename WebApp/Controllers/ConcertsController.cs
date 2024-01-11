@@ -17,9 +17,7 @@ public class ConcertsController : ControllerBase
         IConfiguration configuration)
     {
         _concertServices = concertServices;
-        _numberElementsPerPage = configuration.GetValue<int?>("NumberElementsPerPage") is not null
-            ? Convert.ToInt32(configuration.GetValue<int>("NumberElementsPerPage"))
-            : 2;
+        _numberElementsPerPage = configuration.GetValue("NumberElementsPerPage", 2);
         _logger = logger;
     }
 
